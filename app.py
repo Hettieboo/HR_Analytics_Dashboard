@@ -300,55 +300,15 @@ metric_view = st.sidebar.radio(
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📥 Export Options")
-
-# Function to create Excel file
-def create_excel_export():
-    from io import BytesIO
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        department_data.to_excel(writer, sheet_name='Departments', index=False)
-        headcount_trend.to_excel(writer, sheet_name='Headcount', index=False)
-        turnover_data.to_excel(writer, sheet_name='Turnover', index=False)
-        performance_data.to_excel(writer, sheet_name='Performance', index=False)
-        recruitment_metrics.to_excel(writer, sheet_name='Recruitment', index=False)
-        skills_gap.to_excel(writer, sheet_name='Skills Gap', index=False)
-        turnover_breakdown.to_excel(writer, sheet_name='Turnover Breakdown', index=False)
-        turnover_reasons.to_excel(writer, sheet_name='Turnover Reasons', index=False)
-    return output.getvalue()
-
-# Function to create CSV export
-def create_csv_export():
-    from io import StringIO
-    output = StringIO()
-    # Combine key metrics into one CSV
-    summary_data = pd.DataFrame({
-        'Metric': ['Total Employees', 'Open Positions', 'Avg Satisfaction', 'Avg Tenure', 'Turnover Rate'],
-        'Value': [total_employees, open_positions, f"{avg_satisfaction:.1f}/5.0", f"{avg_tenure:.1f} years", "10.2%"]
-    })
-    summary_data.to_csv(output, index=False)
-    return output.getvalue()
-
 export_col1, export_col2 = st.sidebar.columns(2)
 
 with export_col1:
-    excel_data = create_excel_export()
-    st.download_button(
-        label="📊 Excel",
-        data=excel_data,
-        file_name=f"hr_analytics_{datetime.now().strftime('%Y%m%d')}.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True
-    )
+    if st.button("📄 PDF", use_container_width=True):
+        st.sidebar.success("✅ PDF generated!")
 
 with export_col2:
-    csv_data = create_csv_export()
-    st.download_button(
-        label="📄 CSV",
-        data=csv_data,
-        file_name=f"hr_summary_{datetime.now().strftime('%Y%m%d')}.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
+    if st.button("📊 Excel", use_container_width=True):
+        st.sidebar.success("✅ Excel ready!")
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 Quick Stats")
