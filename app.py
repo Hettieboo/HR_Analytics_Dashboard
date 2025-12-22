@@ -68,7 +68,7 @@ st.markdown("""
 # Flashcards data
 flashcards = [
     {"category": "Fundamentals", "question": "What is the difference between OLTP and OLAP?", 
-     "answer": "OLTP systems handle day-to-day transactions and are optimized for many small inserts and updates, like banking or e-commerce systems. OLAP systems are designed for analytics, with fewer writes but heavy read queries over large datasets, such as aggregations and reporting."},
+     "answer": "OLTP (Online Transaction Processing) systems handle day-to-day transactions and are optimized for many small inserts and updates, like banking or e-commerce systems. OLAP (Online Analytical Processing) systems are designed for analytics, with fewer writes but heavy read queries over large datasets, such as aggregations and reporting."},
     {"category": "Fundamentals", "question": "What is batch processing vs stream processing?", 
      "answer": "Batch processing handles data in chunks at scheduled times, for example daily CSV imports. Stream processing handles data in real time or near real time, such as click events or sensor data."},
     {"category": "Data Modeling", "question": "How would you model the Country table in a data warehouse?", 
