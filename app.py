@@ -378,7 +378,7 @@ st.markdown(f"""
         </div>
         <div class="header-stat-item">
             <div class="header-stat-label">Departments</div>
-            <div class="header-stat-value">6</div>
+            <div class="header-stat-value">{len(department_data)}</div>
         </div>
         <div class="header-stat-item">
             <div class="header-stat-label">Open Positions</div>
@@ -390,7 +390,7 @@ st.markdown(f"""
         </div>
         <div class="header-stat-item">
             <div class="header-stat-label">Avg Tenure</div>
-            <div class="header-stat-value">3.2 yrs</div>
+            <div class="header-stat-value">{department_data['Avg Tenure'].mean():.1f} yrs</div>
         </div>
     </div>
 </div>
