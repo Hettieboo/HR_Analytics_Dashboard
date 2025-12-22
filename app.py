@@ -282,10 +282,12 @@ def load_data():
  skills_gap, compensation_trend, recruitment_metrics, turnover_breakdown,
  turnover_reasons, tenure_analysis) = load_data()
 
-# Calculate stats for header
-total_employees = department_data['Employee Count'].sum()
-avg_satisfaction = department_data['Satisfaction'].mean()
-open_positions = department_data['Open Positions'].sum()
+# Calculate stats for header and sidebar
+total_employees = int(department_data['Employee Count'].sum())
+avg_satisfaction = float(department_data['Satisfaction'].mean())
+open_positions = int(department_data['Open Positions'].sum())
+avg_tenure = float(department_data['Avg Tenure'].mean())
+num_departments = len(department_data)
 
 # Sidebar with enhanced filters
 st.sidebar.title("⚙️ Dashboard Controls")
@@ -352,7 +354,7 @@ st.sidebar.markdown(f"""
         <strong>Avg Satisfaction:</strong> {avg_satisfaction:.1f}/5.0
     </div>
     <div>
-        <strong>Avg Tenure:</strong> 3.2 years
+        <strong>Avg Tenure:</strong> {avg_tenure:.1f} years
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -378,7 +380,7 @@ st.markdown(f"""
         </div>
         <div class="header-stat-item">
             <div class="header-stat-label">Departments</div>
-            <div class="header-stat-value">{len(department_data)}</div>
+            <div class="header-stat-value">{num_departments}</div>
         </div>
         <div class="header-stat-item">
             <div class="header-stat-label">Open Positions</div>
@@ -390,7 +392,7 @@ st.markdown(f"""
         </div>
         <div class="header-stat-item">
             <div class="header-stat-label">Avg Tenure</div>
-            <div class="header-stat-value">{department_data['Avg Tenure'].mean():.1f} yrs</div>
+            <div class="header-stat-value">{avg_tenure:.1f} yrs</div>
         </div>
     </div>
 </div>
