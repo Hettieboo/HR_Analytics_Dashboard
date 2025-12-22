@@ -16,149 +16,150 @@ st.set_page_config(
 # Custom CSS with enhanced styling
 st.markdown("""
 <style>
-    .main {
-        background-color: #f8f9fa;
-    }
-    
-    /* Header styling */
-    .header-container {
+    .main-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-        margin-bottom: 30px;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
         color: white;
     }
     
-    .header-title {
-        font-size: 42px;
-        font-weight: 700;
+    .main-header h1 {
         margin: 0;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        font-size: 2.5rem;
+        font-weight: 700;
     }
     
-    .header-subtitle {
-        font-size: 18px;
-        margin-top: 10px;
-        color: rgba(255,255,255,0.9);
+    .main-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .update-time {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        display: inline-block;
+        margin-top: 1rem;
+        font-size: 0.9rem;
     }
     
     .header-stats {
         display: flex;
-        gap: 30px;
-        margin-top: 25px;
-        flex-wrap: wrap;
+        justify-content: space-around;
+        margin: 2rem 0;
+        gap: 1rem;
     }
     
     .header-stat-item {
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(10px);
-        padding: 15px 25px;
+        background: white;
+        padding: 1.5rem;
         border-radius: 10px;
-        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        flex: 1;
+        text-align: center;
+        border-left: 4px solid #667eea;
     }
     
     .header-stat-label {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        opacity: 0.9;
-        margin-bottom: 5px;
-    }
-    
-    .header-stat-value {
-        font-size: 28px;
-        font-weight: 700;
-    }
-    
-    .last-updated {
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(10px);
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-size: 14px;
-        border: 1px solid rgba(255,255,255,0.2);
-    }
-    
-    /* Card styling */
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 20px;
-        border-radius: 10px;
-        color: white;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .stMetric {
-        background-color: white;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    /* Insight boxes */
-    .insight-box {
-        background-color: #e3f2fd;
-        padding: 15px;
-        border-radius: 8px;
-        border-left: 4px solid #2196F3;
-        margin: 10px 0;
-    }
-    
-    .alert-critical {
-        background-color: #ffebee;
-        border-left: 4px solid #f44336;
-    }
-    
-    .alert-warning {
-        background-color: #fff3e0;
-        border-left: 4px solid #ff9800;
-    }
-    
-    .alert-success {
-        background-color: #e8f5e9;
-        border-left: 4px solid #4caf50;
-    }
-    
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-    }
-    
-    [data-testid="stSidebar"] .stMarkdown {
-        color: white;
-    }
-    
-    /* Typography */
-    h1 {
-        color: #1a237e;
-    }
-    
-    h2, h3 {
-        color: #283593;
-    }
-    
-    /* Tab styling */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: white;
-        padding: 10px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        padding: 0 24px;
-        background-color: #f0f2f6;
-        border-radius: 8px;
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
         font-weight: 500;
     }
     
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+    .header-stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a202c;
+    }
+    
+    .insight-box {
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .insight-positive {
+        background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+        border-left: 4px solid #10b981;
+    }
+    
+    .insight-warning {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .insight-critical {
+        background: linear-gradient(135deg, #fab1a0 0%, #ff7675 100%);
+        border-left: 4px solid #ef4444;
+    }
+    
+    .insight-box h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+    }
+    
+    .insight-box p {
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    
+    .action-item {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #ef4444;
+    }
+    
+    .action-item h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+        color: #1a202c;
+    }
+    
+    .action-item p {
+        margin: 0.3rem 0;
+        font-size: 0.85rem;
+        color: #4a5568;
+    }
+    
+    .footer {
+        background: #f7fafc;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-top: 3rem;
+        text-align: center;
+    }
+    
+    .footer p {
+        margin: 0.3rem 0;
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    
+    .sidebar-quick-stat {
+        background: #f7fafc;
+        padding: 0.5rem;
+        border-radius: 5px;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Streamlit specific overrides */
+    .stMetric {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    div[data-testid="stMetricValue"] {
+        font-size: 1.8rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -272,14 +273,14 @@ def load_data():
     })
     
     return (headcount_trend, department_data, diversity_data, age_diversity, 
-            turnover_data, performance_data, engagement_trend, recruitment_funnel,
-            skills_gap, compensation_trend, recruitment_metrics, turnover_breakdown,
+            turnover_data, performance_data, engagement_trend, recruitment_funnel, 
+            skills_gap, compensation_trend, recruitment_metrics, turnover_breakdown, 
             turnover_reasons, tenure_analysis)
 
 # Load data
 (headcount_trend, department_data, diversity_data, age_diversity, 
- turnover_data, performance_data, engagement_trend, recruitment_funnel,
- skills_gap, compensation_trend, recruitment_metrics, turnover_breakdown,
+ turnover_data, performance_data, engagement_trend, recruitment_funnel, 
+ skills_gap, compensation_trend, recruitment_metrics, turnover_breakdown, 
  turnover_reasons, tenure_analysis) = load_data()
 
 # Calculate stats for header and sidebar
@@ -288,9 +289,6 @@ avg_satisfaction = float(department_data['Satisfaction'].mean())
 open_positions = int(department_data['Open Positions'].sum())
 avg_tenure = float(department_data['Avg Tenure'].mean())
 num_departments = len(department_data)
-
-# Debug: Verify values are calculated (remove this in production)
-# st.write(f"Debug: {total_employees}, {num_departments}, {open_positions}, {avg_satisfaction}, {avg_tenure}")
 
 # Sidebar with enhanced filters
 st.sidebar.title("⚙️ Dashboard Controls")
@@ -334,11 +332,12 @@ metric_view = st.sidebar.radio(
 # Export options
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📥 Export Options")
-
 export_col1, export_col2 = st.sidebar.columns(2)
+
 with export_col1:
     if st.button("📄 PDF", use_container_width=True):
         st.sidebar.success("✅ PDF generated!")
+
 with export_col2:
     if st.button("📊 Excel", use_container_width=True):
         st.sidebar.success("✅ Excel ready!")
@@ -346,19 +345,17 @@ with export_col2:
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 Quick Stats")
 st.sidebar.markdown(f"""
-<div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: white;">
-    <div style="margin-bottom: 10px;">
-        <strong>Total Employees:</strong> {total_employees}
-    </div>
-    <div style="margin-bottom: 10px;">
-        <strong>Open Positions:</strong> {open_positions}
-    </div>
-    <div style="margin-bottom: 10px;">
-        <strong>Avg Satisfaction:</strong> {avg_satisfaction:.1f}/5.0
-    </div>
-    <div>
-        <strong>Avg Tenure:</strong> {avg_tenure:.1f} years
-    </div>
+<div class="sidebar-quick-stat">
+    <strong>Total Employees:</strong> {total_employees}
+</div>
+<div class="sidebar-quick-stat">
+    <strong>Open Positions:</strong> {open_positions}
+</div>
+<div class="sidebar-quick-stat">
+    <strong>Avg Satisfaction:</strong> {avg_satisfaction:.1f}/5.0
+</div>
+<div class="sidebar-quick-stat">
+    <strong>Avg Tenure:</strong> {avg_tenure:.1f} years
 </div>
 """, unsafe_allow_html=True)
 
@@ -366,39 +363,34 @@ st.markdown("---")
 
 # Main header with beautiful formatting
 st.markdown(f"""
-<div class="header-container">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
-        <div style="flex: 1; min-width: 300px;">
-            <h1 class="header-title">👥 HR Analytics Dashboard</h1>
-            <p class="header-subtitle">Comprehensive workforce insights and predictive analytics</p>
-        </div>
-        <div class="last-updated">
-            <div style="font-weight: 600;">📅 Last Updated</div>
-            <div style="margin-top: 5px;">{datetime.now().strftime('%B %d, %Y at %H:%M')}</div>
-        </div>
+<div class="main-header">
+    <h1>👥 HR Analytics Dashboard</h1>
+    <p>Comprehensive workforce insights and predictive analytics</p>
+    <div class="update-time">
+        📅 Last Updated: {datetime.now().strftime('%B %d, %Y at %H:%M')}
     </div>
-    
-    <div class="header-stats">
-        <div class="header-stat-item">
-            <div class="header-stat-label">Total Workforce</div>
-            <div class="header-stat-value">{total_employees}</div>
-        </div>
-        <div class="header-stat-item">
-            <div class="header-stat-label">Departments</div>
-            <div class="header-stat-value">{num_departments}</div>
-        </div>
-        <div class="header-stat-item">
-            <div class="header-stat-label">Open Positions</div>
-            <div class="header-stat-value">{open_positions}</div>
-        </div>
-        <div class="header-stat-item">
-            <div class="header-stat-label">Satisfaction Score</div>
-            <div class="header-stat-value">{avg_satisfaction:.1f}/5.0</div>
-        </div>
-        <div class="header-stat-item">
-            <div class="header-stat-label">Avg Tenure</div>
-            <div class="header-stat-value">{avg_tenure:.1f} yrs</div>
-        </div>
+</div>
+
+<div class="header-stats">
+    <div class="header-stat-item">
+        <div class="header-stat-label">Total Workforce</div>
+        <div class="header-stat-value">{total_employees}</div>
+    </div>
+    <div class="header-stat-item">
+        <div class="header-stat-label">Departments</div>
+        <div class="header-stat-value">{num_departments}</div>
+    </div>
+    <div class="header-stat-item">
+        <div class="header-stat-label">Open Positions</div>
+        <div class="header-stat-value">{open_positions}</div>
+    </div>
+    <div class="header-stat-item">
+        <div class="header-stat-label">Satisfaction Score</div>
+        <div class="header-stat-value">{avg_satisfaction:.1f}/5.0</div>
+    </div>
+    <div class="header-stat-item">
+        <div class="header-stat-label">Avg Tenure</div>
+        <div class="header-stat-value">{avg_tenure:.1f} yrs</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -411,25 +403,25 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.markdown("""
-    <div class='insight-box alert-success'>
-        <strong>✅ Positive Trend:</strong><br>
-        Employee engagement increased by 9.7% over the last 6 months, with Work-Life balance showing the strongest improvement.
+    <div class="insight-box insight-positive">
+        <h4>✅ Positive Trend</h4>
+        <p>Employee engagement increased by 9.7% over the last 6 months, with Work-Life balance showing the strongest improvement.</p>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown("""
-    <div class='insight-box alert-warning'>
-        <strong>⚠️ Attention Needed:</strong><br>
-        Sales department turnover (14.5%) is above industry average. Consider retention initiatives.
+    <div class="insight-box insight-warning">
+        <h4>⚠️ Attention Needed</h4>
+        <p>Sales department turnover (14.5%) is above industry average. Consider retention initiatives.</p>
     </div>
     """, unsafe_allow_html=True)
 
 with col3:
     st.markdown("""
-    <div class='insight-box alert-critical'>
-        <strong>🔴 Critical Gap:</strong><br>
-        Cybersecurity and AI/ML skills are 32% and 30% below required levels. Training recommended.
+    <div class="insight-box insight-critical">
+        <h4>🔴 Critical Gap</h4>
+        <p>Cybersecurity and AI/ML skills are 32% and 30% below required levels. Training recommended.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -479,7 +471,12 @@ st.markdown("---")
 
 # Tabbed interface for better organization
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "📊 Overview", "👤 Workforce Analytics", "📈 Performance", "🎯 Recruitment", "💰 Compensation", "🔄 Turnover Analysis"
+    "📊 Overview",
+    "👤 Workforce Analytics",
+    "📈 Performance",
+    "🎯 Recruitment",
+    "💰 Compensation",
+    "🔄 Turnover Analysis"
 ])
 
 with tab1:
@@ -489,6 +486,7 @@ with tab1:
     with col1:
         st.subheader("📈 Headcount Trend & Forecast")
         fig_headcount = go.Figure()
+        
         fig_headcount.add_trace(go.Scatter(
             x=headcount_trend['Month'],
             y=headcount_trend['Employees'],
@@ -497,6 +495,7 @@ with tab1:
             line=dict(color='#3b82f6', width=3),
             marker=dict(size=8)
         ))
+        
         fig_headcount.add_trace(go.Scatter(
             x=headcount_trend['Month'][-2:],
             y=headcount_trend['Forecast'][-2:],
@@ -505,6 +504,7 @@ with tab1:
             line=dict(color='#10b981', width=3, dash='dash'),
             marker=dict(size=8)
         ))
+        
         fig_headcount.add_trace(go.Bar(
             x=headcount_trend['Month'],
             y=headcount_trend['New Hires'],
@@ -512,6 +512,7 @@ with tab1:
             marker_color='rgba(16, 185, 129, 0.5)',
             yaxis='y2'
         ))
+        
         fig_headcount.update_layout(
             height=400,
             hovermode='x unified',
@@ -523,6 +524,7 @@ with tab1:
     with col2:
         st.subheader("🏢 Department Metrics")
         filtered_dept = department_data[department_data['Department'].isin(selected_departments)]
+        
         fig_dept = go.Figure()
         fig_dept.add_trace(go.Bar(
             x=filtered_dept['Department'],
@@ -530,6 +532,7 @@ with tab1:
             name='Employees',
             marker_color='#3b82f6'
         ))
+        
         fig_dept.add_trace(go.Scatter(
             x=filtered_dept['Department'],
             y=filtered_dept['Satisfaction'] * 20,
@@ -538,6 +541,7 @@ with tab1:
             marker=dict(size=10, color='#f59e0b'),
             yaxis='y2'
         ))
+        
         fig_dept.update_layout(
             height=400,
             yaxis2=dict(overlaying='y', side='right', title='Satisfaction'),
@@ -576,18 +580,21 @@ with tab2:
     with col3:
         st.subheader("📉 Turnover Comparison")
         fig_turnover = go.Figure()
+        
         fig_turnover.add_trace(go.Bar(
             name='Current Q',
             x=turnover_data['Department'],
             y=turnover_data['Current Quarter'],
             marker_color='#ef4444'
         ))
+        
         fig_turnover.add_trace(go.Bar(
             name='Previous Q',
             x=turnover_data['Department'],
             y=turnover_data['Previous Quarter'],
             marker_color='#fca5a5'
         ))
+        
         fig_turnover.add_trace(go.Scatter(
             name='Industry Avg',
             x=turnover_data['Department'],
@@ -596,6 +603,7 @@ with tab2:
             marker=dict(size=10, color='#1f2937'),
             line=dict(width=2, dash='dash')
         ))
+        
         fig_turnover.update_layout(barmode='group', height=350)
         fig_turnover.update_xaxes(tickangle=-45)
         st.plotly_chart(fig_turnover, use_container_width=True)
@@ -605,18 +613,21 @@ with tab2:
     # Skills Gap Analysis
     st.subheader("🎯 Skills Gap Analysis")
     fig_skills = go.Figure()
+    
     fig_skills.add_trace(go.Bar(
         name='Current Level',
         x=skills_gap['Skill'],
         y=skills_gap['Current'],
         marker_color='#3b82f6'
     ))
+    
     fig_skills.add_trace(go.Bar(
         name='Required Level',
         x=skills_gap['Skill'],
         y=skills_gap['Required'],
         marker_color='#10b981'
     ))
+    
     fig_skills.add_trace(go.Scatter(
         name='Gap',
         x=skills_gap['Skill'],
@@ -626,6 +637,7 @@ with tab2:
         line=dict(width=3),
         yaxis='y2'
     ))
+    
     fig_skills.update_layout(
         barmode='group',
         height=400,
@@ -640,18 +652,21 @@ with tab3:
     with col1:
         st.subheader("⭐ Performance Distribution")
         fig_performance = go.Figure()
+        
         fig_performance.add_trace(go.Bar(
             name='Current Period',
             x=performance_data['Rating'],
             y=performance_data['Count'],
             marker_color='#10b981'
         ))
+        
         fig_performance.add_trace(go.Bar(
             name='Previous Period',
             x=performance_data['Rating'],
             y=performance_data['Previous'],
             marker_color='#86efac'
         ))
+        
         fig_performance.update_layout(barmode='group', height=400)
         fig_performance.update_xaxes(tickangle=-45)
         st.plotly_chart(fig_performance, use_container_width=True)
@@ -659,6 +674,7 @@ with tab3:
     with col2:
         st.subheader("💚 Engagement Breakdown")
         fig_engagement = go.Figure()
+        
         for col in ['Overall', 'Recognition', 'Growth', 'Work-Life']:
             fig_engagement.add_trace(go.Scatter(
                 x=engagement_trend['Month'],
@@ -667,6 +683,7 @@ with tab3:
                 name=col,
                 line=dict(width=3)
             ))
+        
         fig_engagement.update_layout(height=400, yaxis_range=[0, 100])
         st.plotly_chart(fig_engagement, use_container_width=True)
 
@@ -710,6 +727,7 @@ with tab4:
         # Conversion rates
         st.markdown("**Conversion Rates:**")
         conv_col1, conv_col2 = st.columns(2)
+        
         for i in range(len(recruitment_funnel) - 1):
             rate = (recruitment_funnel.iloc[i+1]['Count'] / recruitment_funnel.iloc[i]['Count']) * 100
             with conv_col1 if i % 2 == 0 else conv_col2:
@@ -722,6 +740,7 @@ with tab4:
     with col2:
         st.subheader("📊 Recruitment Trends")
         fig_recruit_trend = go.Figure()
+        
         fig_recruit_trend.add_trace(go.Scatter(
             x=recruitment_metrics['Month'],
             y=recruitment_metrics['Applications'],
@@ -730,6 +749,7 @@ with tab4:
             line=dict(color='#3b82f6', width=3),
             yaxis='y'
         ))
+        
         fig_recruit_trend.add_trace(go.Bar(
             x=recruitment_metrics['Month'],
             y=recruitment_metrics['Hires'],
@@ -737,361 +757,11 @@ with tab4:
             marker_color='#10b981',
             yaxis='y2'
         ))
+        
         fig_recruit_trend.update_layout(
             height=400,
             yaxis=dict(title='Applications'),
             yaxis2=dict(title='Hires', overlaying='y', side='right'),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
         )
-        st.plotly_chart(fig_recruit_trend, use_container_width=True)
-    
-    st.markdown("---")
-    
-    # Additional recruitment metrics
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("⏱️ Time to Fill Trend")
-        fig_ttf = px.line(
-            recruitment_metrics,
-            x='Month',
-            y='Time to Fill',
-            markers=True,
-            line_shape='spline'
-        )
-        fig_ttf.update_traces(line_color='#f59e0b', line_width=3, marker_size=10)
-        fig_ttf.update_layout(height=300)
-        st.plotly_chart(fig_ttf, use_container_width=True)
-    
-    with col2:
-        st.subheader("💵 Cost per Hire Trend")
-        fig_cph = px.line(
-            recruitment_metrics,
-            x='Month',
-            y='Cost per Hire',
-            markers=True,
-            line_shape='spline'
-        )
-        fig_cph.update_traces(line_color='#8b5cf6', line_width=3, marker_size=10)
-        fig_cph.update_layout(height=300)
-        st.plotly_chart(fig_cph, use_container_width=True)
-    
-    st.markdown("---")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("📋 Open Positions by Department")
-        fig_open = px.bar(
-            department_data,
-            x='Department',
-            y='Open Positions',
-            color='Open Positions',
-            color_continuous_scale='Oranges',
-            text='Open Positions'
-        )
-        fig_open.update_traces(textposition='outside')
-        fig_open.update_layout(height=350, showlegend=False)
-        st.plotly_chart(fig_open, use_container_width=True)
-    
-    with col2:
-        st.subheader("📈 Application to Hire Ratio")
-        recruitment_metrics['Ratio'] = recruitment_metrics['Applications'] / recruitment_metrics['Hires']
-        fig_ratio = px.bar(
-            recruitment_metrics,
-            x='Month',
-            y='Ratio',
-            text='Ratio',
-            color='Ratio',
-            color_continuous_scale='Blues'
-        )
-        fig_ratio.update_traces(texttemplate='%{text:.1f}:1', textposition='outside')
-        fig_ratio.update_layout(height=350, showlegend=False)
-        st.plotly_chart(fig_ratio, use_container_width=True)
-
-with tab5:
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("💰 Salary vs Market Rate")
-        fig_comp = go.Figure()
-        fig_comp.add_trace(go.Scatter(
-            x=compensation_trend['Quarter'],
-            y=compensation_trend['Avg Salary'],
-            mode='lines+markers',
-            name='Company Avg',
-            line=dict(color='#3b82f6', width=3),
-            marker=dict(size=10)
-        ))
-        fig_comp.add_trace(go.Scatter(
-            x=compensation_trend['Quarter'],
-            y=compensation_trend['Market Rate'],
-            mode='lines+markers',
-            name='Market Rate',
-            line=dict(color='#ef4444', width=3, dash='dash'),
-            marker=dict(size=10)
-        ))
-        fig_comp.update_layout(height=400)
-        st.plotly_chart(fig_comp, use_container_width=True)
-    
-    with col2:
-        st.subheader("💵 Average Salary by Department")
-        fig_salary = px.bar(
-            department_data.sort_values('Avg Salary', ascending=True),
-            y='Department',
-            x='Avg Salary',
-            orientation='h',
-            color='Avg Salary',
-            color_continuous_scale='YlOrRd',
-            text='Avg Salary'
-        )
-        fig_salary.update_traces(texttemplate='$%{text:,.0f}', textposition='outside')
-        fig_salary.update_layout(height=400, showlegend=False)
-        st.plotly_chart(fig_salary, use_container_width=True)
-
-with tab6:
-    st.markdown("### 🔄 Turnover Analysis & Insights")
-    
-    # Turnover KPIs at top
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.metric("Overall Turnover Rate", "10.2%", "-1.3%")
-    
-    with col2:
-        voluntary_rate = (turnover_breakdown.iloc[0]['Count'] / turnover_breakdown['Count'].sum()) * 10.2
-        st.metric("Voluntary Turnover", f"{voluntary_rate:.1f}%", "-0.8%")
-    
-    with col3:
-        st.metric("Avg Tenure", "3.2 years", "+0.3 years")
-    
-    with col4:
-        st.metric("90-Day Retention", "94.5%", "+2.1%")
-    
-    st.markdown("---")
-    
-    # Row 1: Turnover breakdown and reasons
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("📊 Turnover Breakdown")
-        fig_turnover_breakdown = px.pie(
-            turnover_breakdown,
-            values='Count',
-            names='Category',
-            hole=0.4,
-            color_discrete_sequence=px.colors.sequential.RdBu
-        )
-        fig_turnover_breakdown.update_traces(
-            textposition='inside',
-            textinfo='percent+label'
-        )
-        fig_turnover_breakdown.update_layout(height=400)
-        st.plotly_chart(fig_turnover_breakdown, use_container_width=True)
-        
-        # Summary stats
-        st.markdown("**Turnover Summary:**")
-        st.dataframe(turnover_breakdown[['Category', 'Count', 'Percentage']], 
-                    use_container_width=True, hide_index=True)
-    
-    with col2:
-        st.subheader("🔍 Voluntary Turnover Reasons")
-        fig_reasons = px.bar(
-            turnover_reasons.sort_values('Count', ascending=True),
-            y='Reason',
-            x='Count',
-            orientation='h',
-            color='Count',
-            color_continuous_scale='Reds',
-            text='Count'
-        )
-        fig_reasons.update_traces(textposition='outside')
-        fig_reasons.update_layout(height=400, showlegend=False)
-        st.plotly_chart(fig_reasons, use_container_width=True)
-        
-        st.info("💡 **Key Insight:** 61% of voluntary turnover is due to compensation and career growth")
-    
-    st.markdown("---")
-    
-    # Row 2: Tenure analysis and turnover by department
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("⏳ Turnover by Tenure")
-        fig_tenure = go.Figure()
-        fig_tenure.add_trace(go.Bar(
-            x=tenure_analysis['Tenure Range'],
-            y=tenure_analysis['Employees'],
-            name='Employee Count',
-            marker_color='#3b82f6',
-            yaxis='y'
-        ))
-        fig_tenure.add_trace(go.Scatter(
-            x=tenure_analysis['Tenure Range'],
-            y=tenure_analysis['Turnover Rate'],
-            name='Turnover Rate %',
-            mode='lines+markers',
-            marker=dict(size=10, color='#ef4444'),
-            line=dict(width=3),
-            yaxis='y2'
-        ))
-        fig_tenure.update_layout(
-            height=400,
-            yaxis=dict(title='Employees'),
-            yaxis2=dict(title='Turnover Rate %', overlaying='y', side='right'),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-        )
-        st.plotly_chart(fig_tenure, use_container_width=True)
-        
-        st.warning("⚠️ **High Risk:** Employees with 0-1 year tenure have 22.5% turnover rate")
-    
-    with col2:
-        st.subheader("🏢 Turnover Rate by Department")
-        fig_dept_turnover = go.Figure()
-        fig_dept_turnover.add_trace(go.Bar(
-            name='Current Quarter',
-            x=turnover_data['Department'],
-            y=turnover_data['Current Quarter'],
-            marker_color='#ef4444'
-        ))
-        fig_dept_turnover.add_trace(go.Bar(
-            name='Previous Quarter',
-            x=turnover_data['Department'],
-            y=turnover_data['Previous Quarter'],
-            marker_color='#fca5a5'
-        ))
-        fig_dept_turnover.add_trace(go.Scatter(
-            name='Industry Avg',
-            x=turnover_data['Department'],
-            y=turnover_data['Industry Avg'],
-            mode='lines+markers',
-            marker=dict(size=10, color='#1f2937'),
-            line=dict(width=2, dash='dash')
-        ))
-        fig_dept_turnover.update_layout(
-            barmode='group',
-            height=400,
-            xaxis_tickangle=-45
-        )
-        st.plotly_chart(fig_dept_turnover, use_container_width=True)
-    
-    st.markdown("---")
-    
-    # Predictive insights
-    st.subheader("🎯 Retention Recommendations")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("""
-        <div class='insight-box alert-critical'>
-            <strong>🔴 Immediate Action - Sales Dept</strong><br>
-            14.5% turnover (highest)<br>
-            <small>• Exit interview analysis<br>
-            • Compensation review<br>
-            • Manager training</small>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class='insight-box alert-warning'>
-            <strong>🟡 Focus on New Hires</strong><br>
-            First-year turnover at 22.5%<br>
-            <small>• Enhance onboarding<br>
-            • 30/60/90 day check-ins<br>
-            • Buddy system</small>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div class='insight-box alert-success'>
-            <strong>✅ Retain Top Talent</strong><br>
-            94.5% 90-day retention<br>
-            <small>• Career development plans<br>
-            • Competitive compensation<br>
-            • Recognition programs</small>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    # Cost of turnover
-    st.subheader("💰 Cost of Turnover Analysis")
-    
-    avg_salary = department_data['Avg Salary'].mean()
-    total_turnover = 30  # Example: 30 employees left this quarter
-    cost_per_turnover = avg_salary * 0.5  # Typically 50-200% of annual salary
-    total_cost = total_turnover * cost_per_turnover
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Employees Lost (6mo)", total_turnover)
-    with col2:
-        st.metric("Avg Cost per Turnover", f"${cost_per_turnover:,.0f}")
-    with col3:
-        st.metric("Total Turnover Cost", f"${total_cost:,.0f}", delta_color="off")
-    
-    st.info(f"💡 **Estimated Impact:** Based on 50% of average salary (${avg_salary:,.0f}), turnover cost is approximately ${total_cost:,.0f} over 6 months. Reducing turnover by 2% could save ~${total_cost * 0.2:,.0f}")
-
-st.markdown("---")
-
-# Action Items Dashboard
-st.subheader("⚠️ Action Items & Recommendations")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("#### 🔴 Critical Actions")
-    st.markdown("""
-    <div class='insight-box alert-critical'>
-        <strong>1. Sales Turnover Crisis</strong><br>
-        14.5% turnover rate - 3.5% above target<br>
-        <small>Action: Conduct exit interviews, review compensation</small>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class='insight-box alert-critical'>
-        <strong>2. Skills Gap - Cybersecurity</strong><br>
-        32% gap in critical security skills<br>
-        <small>Action: Launch upskilling program immediately</small>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown("#### 🟡 Medium Priority")
-    st.markdown("""
-    <div class='insight-box alert-warning'>
-        <strong>1. Performance Reviews</strong><br>
-        23 employees need improvement plans<br>
-        <small>Action: Schedule manager training sessions</small>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class='insight-box alert-warning'>
-        <strong>2. Compensation Gap</strong><br>
-        Trailing market rate by $1,300<br>
-        <small>Action: Review salary bands for Q1 2025</small>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("---")
-
-# Footer with additional info
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.info("💡 **Tip:** Use filters to drill down into specific departments")
-with col2:
-    st.success("✅ **Data Quality:** 98% - Last validated today")
-with col3:
-    st.warning("📅 **Next Review:** Quarterly board meeting in 12 days")
-
-st.markdown("""
-<div style='text-align: center; color: #666; padding: 20px; margin-top: 20px; border-top: 1px solid #ddd;'>
-    <p>HR Analytics Dashboard v2.0 | Powered by AI | Real-time data synchronization</p>
-    <small>For support, contact hr-analytics@company.com</small>
-</div>
-""", unsafe_allow_html=True)
+        st.plot
