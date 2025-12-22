@@ -19,6 +19,69 @@ st.markdown("""
     .main {
         background-color: #f8f9fa;
     }
+    
+    /* Header styling */
+    .header-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        margin-bottom: 30px;
+        color: white;
+    }
+    
+    .header-title {
+        font-size: 42px;
+        font-weight: 700;
+        margin: 0;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .header-subtitle {
+        font-size: 18px;
+        margin-top: 10px;
+        color: rgba(255,255,255,0.9);
+    }
+    
+    .header-stats {
+        display: flex;
+        gap: 30px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+    
+    .header-stat-item {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        padding: 15px 25px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .header-stat-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+    
+    .header-stat-value {
+        font-size: 28px;
+        font-weight: 700;
+    }
+    
+    .last-updated {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    /* Card styling */
     .metric-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 20px;
@@ -26,12 +89,15 @@ st.markdown("""
         color: white;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
+    
     .stMetric {
         background-color: white;
         padding: 15px;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+    
+    /* Insight boxes */
     .insight-box {
         background-color: #e3f2fd;
         padding: 15px;
@@ -39,23 +105,60 @@ st.markdown("""
         border-left: 4px solid #2196F3;
         margin: 10px 0;
     }
+    
     .alert-critical {
         background-color: #ffebee;
         border-left: 4px solid #f44336;
     }
+    
     .alert-warning {
         background-color: #fff3e0;
         border-left: 4px solid #ff9800;
     }
+    
     .alert-success {
         background-color: #e8f5e9;
         border-left: 4px solid #4caf50;
     }
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    [data-testid="stSidebar"] .stMarkdown {
+        color: white;
+    }
+    
+    /* Typography */
     h1 {
         color: #1a237e;
     }
+    
     h2, h3 {
         color: #283593;
+    }
+    
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: white;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        padding: 0 24px;
+        background-color: #f0f2f6;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -179,6 +282,11 @@ def load_data():
  skills_gap, compensation_trend, recruitment_metrics, turnover_breakdown,
  turnover_reasons, tenure_analysis) = load_data()
 
+# Calculate stats for header
+total_employees = department_data['Employee Count'].sum()
+avg_satisfaction = department_data['Satisfaction'].mean()
+open_positions = department_data['Open Positions'].sum()
+
 # Sidebar with enhanced filters
 st.sidebar.title("⚙️ Dashboard Controls")
 
@@ -189,12 +297,28 @@ date_range = st.sidebar.date_input(
     max_value=datetime.now()
 )
 
-# Department filter
-selected_departments = st.sidebar.multiselect(
-    "Filter Departments",
-    options=department_data['Department'].tolist(),
-    default=department_data['Department'].tolist()
-)
+# Department filter with "Select All" functionality
+all_departments = department_data['Department'].tolist()
+
+# Add "Select All" checkbox
+select_all = st.sidebar.checkbox("Select All Departments", value=True)
+
+if select_all:
+    selected_departments = st.sidebar.multiselect(
+        "Filter Departments",
+        options=all_departments,
+        default=all_departments
+    )
+else:
+    selected_departments = st.sidebar.multiselect(
+        "Filter Departments",
+        options=all_departments,
+        default=[]
+    )
+
+# If no departments selected, default to all
+if not selected_departments:
+    selected_departments = all_departments
 
 # Metric selector
 metric_view = st.sidebar.radio(
@@ -205,31 +329,72 @@ metric_view = st.sidebar.radio(
 # Export options
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📥 Export Options")
-if st.sidebar.button("Export to PDF"):
-    st.sidebar.success("PDF report generated!")
-if st.sidebar.button("Export to Excel"):
-    st.sidebar.success("Excel export complete!")
+
+export_col1, export_col2 = st.sidebar.columns(2)
+with export_col1:
+    if st.button("📄 PDF", use_container_width=True):
+        st.sidebar.success("✅ PDF generated!")
+with export_col2:
+    if st.button("📊 Excel", use_container_width=True):
+        st.sidebar.success("✅ Excel ready!")
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 Quick Stats")
-total_employees = department_data['Employee Count'].sum()
-avg_satisfaction = department_data['Satisfaction'].mean()
-open_positions = department_data['Open Positions'].sum()
+st.sidebar.markdown(f"""
+<div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: white;">
+    <div style="margin-bottom: 10px;">
+        <strong>Total Employees:</strong> {total_employees}
+    </div>
+    <div style="margin-bottom: 10px;">
+        <strong>Open Positions:</strong> {open_positions}
+    </div>
+    <div style="margin-bottom: 10px;">
+        <strong>Avg Satisfaction:</strong> {avg_satisfaction:.1f}/5.0
+    </div>
+    <div>
+        <strong>Avg Tenure:</strong> 3.2 years
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-st.sidebar.info(f"""
-**Total Employees:** {total_employees}  
-**Open Positions:** {open_positions}  
-**Avg Satisfaction:** {avg_satisfaction:.1f}/5.0  
-**Avg Tenure:** 3.2 years
-""")
-
-# Main header with last refresh time
-col1, col2 = st.columns([3, 1])
-with col1:
-    st.title("👥 HR Analytics Dashboard")
-    st.markdown("### Comprehensive employee metrics and insights")
-with col2:
-    st.markdown(f"**Last Updated:**  \n{datetime.now().strftime('%b %d, %Y %H:%M')}")
+# Main header with beautiful formatting
+st.markdown(f"""
+<div class="header-container">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+        <div style="flex: 1; min-width: 300px;">
+            <h1 class="header-title">👥 HR Analytics Dashboard</h1>
+            <p class="header-subtitle">Comprehensive workforce insights and predictive analytics</p>
+        </div>
+        <div class="last-updated">
+            <div style="font-weight: 600;">📅 Last Updated</div>
+            <div style="margin-top: 5px;">{datetime.now().strftime('%B %d, %Y at %H:%M')}</div>
+        </div>
+    </div>
+    
+    <div class="header-stats">
+        <div class="header-stat-item">
+            <div class="header-stat-label">Total Workforce</div>
+            <div class="header-stat-value">{total_employees}</div>
+        </div>
+        <div class="header-stat-item">
+            <div class="header-stat-label">Departments</div>
+            <div class="header-stat-value">6</div>
+        </div>
+        <div class="header-stat-item">
+            <div class="header-stat-label">Open Positions</div>
+            <div class="header-stat-value">{open_positions}</div>
+        </div>
+        <div class="header-stat-item">
+            <div class="header-stat-label">Satisfaction Score</div>
+            <div class="header-stat-value">{avg_satisfaction:.1f}/5.0</div>
+        </div>
+        <div class="header-stat-item">
+            <div class="header-stat-label">Avg Tenure</div>
+            <div class="header-stat-value">3.2 yrs</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("---")
 
