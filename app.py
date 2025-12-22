@@ -362,8 +362,10 @@ st.sidebar.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown("---")
+
 # Main header with beautiful formatting
-header_html = f"""
+st.markdown(f"""
 <div class="header-container">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
         <div style="flex: 1; min-width: 300px;">
@@ -399,9 +401,7 @@ header_html = f"""
         </div>
     </div>
 </div>
-"""
-
-st.markdown(header_html, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 st.markdown("---")
 
