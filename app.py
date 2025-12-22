@@ -1,9 +1,10 @@
 import streamlit as st
 import random
+import json
 
 # Page config
 st.set_page_config(
-    page_title="Data Engineer Flashcards",
+    page_title="AI-Powered Data Engineer Flashcards",
     page_icon="🧠",
     layout="centered"
 )
@@ -29,6 +30,20 @@ st.markdown("""
         color: #374151;
         line-height: 1.6;
         background-color: #e8f4f8;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    .ai-feedback {
+        background-color: #f3e8ff;
+        border-left: 4px solid #9333ea;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    .hint-box {
+        background-color: #fef3c7;
+        border-left: 4px solid #f59e0b;
         padding: 1rem;
         border-radius: 8px;
         margin-top: 1rem;
@@ -95,11 +110,108 @@ if "card_index" not in st.session_state:
     st.session_state.score = 0
     st.session_state.total = 0
     st.session_state.current_category = "All"
+    st.session_state.user_answer = ""
+    st.session_state.ai_feedback = ""
+    st.session_state.hint = ""
+    st.session_state.custom_cards = []
+
+# AI Helper Functions
+async def get_ai_feedback(question, correct_answer, user_answer):
+    """Get AI feedback on user's answer"""
+    try:
+        response = await fetch("https://api.anthropic.com/v1/messages", {
+            "method": "POST",
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({
+                "model": "claude-sonnet-4-20250514",
+                "max_tokens": 1000,
+                "messages": [{
+                    "role": "user",
+                    "content": f"""You are a helpful data engineering mentor. A student answered an interview question.
+
+Question: {question}
+
+Correct Answer: {correct_answer}
+
+Student's Answer: {user_answer}
+
+Please provide:
+1. Whether their answer is correct/partially correct/incorrect
+2. What they got right
+3. What they missed or got wrong
+4. A tip to improve their answer
+
+Keep it concise and encouraging."""
+                }]
+            })
+        })
+        data = await response.json()
+        return data["content"][0]["text"]
+    except Exception as e:
+        return f"Unable to get AI feedback at this time."
+
+async def get_hint(question, answer):
+    """Get a hint for the current question"""
+    try:
+        response = await fetch("https://api.anthropic.com/v1/messages", {
+            "method": "POST",
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({
+                "model": "claude-sonnet-4-20250514",
+                "max_tokens": 1000,
+                "messages": [{
+                    "role": "user",
+                    "content": f"""Provide a helpful hint for this data engineering interview question without giving away the full answer.
+
+Question: {question}
+
+Full Answer (for context): {answer}
+
+Give a hint that points the student in the right direction. Keep it brief (2-3 sentences)."""
+                }]
+            })
+        })
+        data = await response.json()
+        return data["content"][0]["text"]
+    except Exception as e:
+        return "Unable to generate hint at this time."
+
+async def generate_custom_card(topic, difficulty):
+    """Generate a custom flashcard on a specific topic"""
+    try:
+        response = await fetch("https://api.anthropic.com/v1/messages", {
+            "method": "POST",
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({
+                "model": "claude-sonnet-4-20250514",
+                "max_tokens": 1000,
+                "messages": [{
+                    "role": "user",
+                    "content": f"""Generate a {difficulty} level data engineering interview question about: {topic}
+
+Respond ONLY with valid JSON in this exact format (no markdown, no backticks):
+{{"category": "Custom", "question": "your question here", "answer": "detailed answer here"}}"""
+                }]
+            })
+        })
+        data = await response.json()
+        text = data["content"][0]["text"].strip()
+        # Remove any markdown code block markers
+        text = text.replace("```json", "").replace("```", "").strip()
+        return json.loads(text)
+    except Exception as e:
+        st.error(f"Unable to generate custom card: {e}")
+        return None
 
 # Sidebar
 st.sidebar.title("📚 Flashcard Settings")
 
-categories = ["All"] + sorted(list(set([card["category"] for card in flashcards])))
+# AI Features Toggle
+st.sidebar.markdown("### 🤖 AI Features")
+ai_enabled = st.sidebar.checkbox("Enable AI Features", value=True)
+
+# Category selection
+categories = ["All"] + sorted(list(set([card["category"] for card in flashcards + st.session_state.custom_cards])))
 selected_category = st.sidebar.selectbox("Choose category:", categories, key="category_select")
 
 # Update current category if changed
@@ -107,9 +219,12 @@ if selected_category != st.session_state.current_category:
     st.session_state.current_category = selected_category
     st.session_state.card_index = 0
     st.session_state.show_answer = False
+    st.session_state.ai_feedback = ""
+    st.session_state.hint = ""
 
 # Filter cards by category
-filtered_cards = flashcards if selected_category == "All" else [c for c in flashcards if c["category"] == selected_category]
+all_cards = flashcards + st.session_state.custom_cards
+filtered_cards = all_cards if selected_category == "All" else [c for c in all_cards if c["category"] == selected_category]
 
 # Stats
 st.sidebar.markdown("---")
@@ -127,10 +242,29 @@ if st.sidebar.button("🔄 Reset Progress"):
     st.session_state.total = 0
     st.rerun()
 
+# Custom card generator
+if ai_enabled:
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### ✨ Generate Custom Card")
+    with st.sidebar.form("custom_card_form"):
+        topic = st.text_input("Topic", placeholder="e.g., Data Lakes")
+        difficulty = st.selectbox("Difficulty", ["Easy", "Medium", "Hard"])
+        if st.form_submit_button("Generate"):
+            with st.spinner("Generating custom flashcard..."):
+                import asyncio
+                card = asyncio.run(generate_custom_card(topic, difficulty))
+                if card:
+                    st.session_state.custom_cards.append(card)
+                    st.success(f"Created custom card about {topic}!")
+                    st.rerun()
+
 # Helper functions
 def next_card():
     st.session_state.card_index = random.randint(0, len(filtered_cards) - 1)
     st.session_state.show_answer = False
+    st.session_state.user_answer = ""
+    st.session_state.ai_feedback = ""
+    st.session_state.hint = ""
 
 def mark_correct():
     st.session_state.score += 1
@@ -142,8 +276,8 @@ def mark_incorrect():
     next_card()
 
 # Main content
-st.title("🧠 Data Engineer Interview Flashcards")
-st.markdown("Practice your data engineering knowledge with interactive flashcards!")
+st.title("🧠 AI-Powered Data Engineer Flashcards")
+st.markdown("Practice with intelligent feedback and personalized hints!")
 
 # Display current card
 if len(filtered_cards) > 0:
@@ -157,7 +291,45 @@ if len(filtered_cards) > 0:
     st.markdown(f'<div class="question-text">❓ {card["question"]}</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
+    # AI-powered practice mode
+    if ai_enabled:
+        st.markdown("#### 💭 Try answering first:")
+        user_answer = st.text_area(
+            "Your answer:",
+            value=st.session_state.user_answer,
+            height=100,
+            placeholder="Type your answer here...",
+            key=f"answer_input_{st.session_state.card_index}"
+        )
+        st.session_state.user_answer = user_answer
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("💡 Get Hint", use_container_width=True):
+                with st.spinner("Generating hint..."):
+                    import asyncio
+                    hint = asyncio.run(get_hint(card["question"], card["answer"]))
+                    st.session_state.hint = hint
+                    st.rerun()
+        
+        with col2:
+            if st.button("🤖 Get AI Feedback", use_container_width=True, disabled=not user_answer):
+                with st.spinner("Analyzing your answer..."):
+                    import asyncio
+                    feedback = asyncio.run(get_ai_feedback(card["question"], card["answer"], user_answer))
+                    st.session_state.ai_feedback = feedback
+                    st.rerun()
+        
+        # Display hint if requested
+        if st.session_state.hint:
+            st.markdown(f'<div class="hint-box">💡 <strong>Hint:</strong> {st.session_state.hint}</div>', unsafe_allow_html=True)
+        
+        # Display AI feedback if available
+        if st.session_state.ai_feedback:
+            st.markdown(f'<div class="ai-feedback">🤖 <strong>AI Feedback:</strong><br>{st.session_state.ai_feedback}</div>', unsafe_allow_html=True)
+    
     # Show answer button
+    st.markdown("---")
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         if st.button("👁️ Show Answer", use_container_width=True):
@@ -166,7 +338,7 @@ if len(filtered_cards) > 0:
     
     # Display answer if shown
     if st.session_state.show_answer:
-        st.markdown(f'<div class="answer-text">✅ {card["answer"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="answer-text">✅ <strong>Answer:</strong><br>{card["answer"]}</div>', unsafe_allow_html=True)
         
         st.markdown("---")
         st.markdown("#### Did you get it right?")
@@ -181,7 +353,7 @@ if len(filtered_cards) > 0:
                 mark_incorrect()
                 st.rerun()
     
-    # Next card button (always visible)
+    # Next card button
     st.markdown("---")
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -196,7 +368,7 @@ else:
 st.markdown("---")
 st.markdown(
     "<div style='text-align: center; color: #6b7280; font-size: 0.9rem;'>"
-    "💡 Tip: Use these flashcards regularly to reinforce your data engineering knowledge!"
+    "🤖 Powered by Claude AI • 💡 Get personalized feedback and hints!"
     "</div>",
     unsafe_allow_html=True
 )
