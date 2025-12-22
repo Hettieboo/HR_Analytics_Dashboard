@@ -106,13 +106,21 @@ flashcards = [
 # Initialize session state
 if "card_index" not in st.session_state:
     st.session_state.card_index = 0
+if "show_answer" not in st.session_state:
     st.session_state.show_answer = False
+if "score" not in st.session_state:
     st.session_state.score = 0
+if "total" not in st.session_state:
     st.session_state.total = 0
+if "current_category" not in st.session_state:
     st.session_state.current_category = "All"
+if "user_answer" not in st.session_state:
     st.session_state.user_answer = ""
+if "ai_feedback" not in st.session_state:
     st.session_state.ai_feedback = ""
+if "hint" not in st.session_state:
     st.session_state.hint = ""
+if "custom_cards" not in st.session_state:
     st.session_state.custom_cards = []
 
 # AI Helper Functions
