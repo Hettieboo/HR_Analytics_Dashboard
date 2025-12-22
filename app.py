@@ -1,382 +1,271 @@
 import streamlit as st
-import random
-import json
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from datetime import datetime, timedelta
 
-# Page config
+# Page configuration
 st.set_page_config(
-    page_title="AI-Powered Data Engineer Flashcards",
-    page_icon="🧠",
-    layout="centered"
+    page_title="HR Analytics Dashboard",
+    page_icon="👥",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # Custom CSS
 st.markdown("""
-    <style>
-    .main-card {
+<style>
+    .metric-card {
         background-color: #f0f2f6;
-        padding: 2rem;
+        padding: 20px;
         border-radius: 10px;
-        margin: 1rem 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .question-text {
-        font-size: 1.3rem;
-        font-weight: 500;
-        color: #1f2937;
-        margin: 1rem 0;
-    }
-    .answer-text {
-        font-size: 1.1rem;
-        color: #374151;
-        line-height: 1.6;
-        background-color: #e8f4f8;
-        padding: 1rem;
+    .stMetric {
+        background-color: white;
+        padding: 15px;
         border-radius: 8px;
-        margin-top: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .ai-feedback {
-        background-color: #f3e8ff;
-        border-left: 4px solid #9333ea;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-top: 1rem;
-    }
-    .hint-box {
-        background-color: #fef3c7;
-        border-left: 4px solid #f59e0b;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-top: 1rem;
-    }
-    .category-badge {
-        background-color: #3b82f6;
-        color: white;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        display: inline-block;
-    }
-    .stButton>button {
-        width: 100%;
-        border-radius: 8px;
-        height: 3rem;
-        font-weight: 500;
-    }
-    </style>
+</style>
 """, unsafe_allow_html=True)
 
-# Flashcards data
-flashcards = [
-    {"category": "Fundamentals", "question": "What is the difference between OLTP and OLAP?", 
-     "answer": "OLTP (Online Transaction Processing) systems handle day-to-day transactions and are optimized for many small inserts and updates, like banking or e-commerce systems. OLAP (Online Analytical Processing) systems are designed for analytics, with fewer writes but heavy read queries over large datasets, such as aggregations and reporting."},
-    {"category": "Fundamentals", "question": "What is batch processing vs stream processing?", 
-     "answer": "Batch processing handles data in chunks at scheduled times, for example daily CSV imports. Stream processing handles data in real time or near real time, such as click events or sensor data."},
-    {"category": "Data Modeling", "question": "How would you model the Country table in a data warehouse?", 
-     "answer": "I would create a Country dimension table with attributes like country name, code, and continent. Population could either remain in the dimension if it's static or move to a fact table if it changes over time."},
-    {"category": "Data Modeling", "question": "What is a star schema?", 
-     "answer": "A star schema consists of a central fact table connected to dimension tables. It simplifies queries and improves performance for analytics."},
-    {"category": "ETL", "question": "Explain ETL vs ELT.", 
-     "answer": "ETL means transforming data before loading it into the warehouse, often used in traditional systems. ELT loads raw data first and transforms it inside the warehouse, which is common in cloud data platforms."},
-    {"category": "ETL", "question": "How would you load this CSV daily without duplicates?", 
-     "answer": "I would use a staging table, load the CSV into it, then insert only new records into the final table using a unique key or a timestamp to avoid duplicates."},
-    {"category": "Data Quality", "question": "How do you ensure data quality?", 
-     "answer": "I check for null values, validate data ranges, enforce uniqueness, and monitor row counts and freshness after each load."},
-    {"category": "Data Quality", "question": "What would you do if population values were negative?", 
-     "answer": "I would block the data from loading, log the issue, and notify stakeholders, because negative population values indicate invalid data."},
-    {"category": "Performance", "question": "When should you create an index?", 
-     "answer": "Indexes should be created on columns frequently used in filters, joins, or sorting, but avoided on columns with frequent updates."},
-    {"category": "Performance", "question": "What is partitioning?", 
-     "answer": "Partitioning splits data into logical segments, such as by date or continent, which improves query performance and manageability."},
-    {"category": "Python", "question": "How would you read this CSV in Python?", 
-     "answer": "I would use pandas with `read_csv`, inspect the data, handle missing values, and validate schema before loading."},
-    {"category": "Python", "question": "Why use virtual environments?", 
-     "answer": "Virtual environments isolate dependencies so different projects don't conflict with each other."},
-    {"category": "Tools", "question": "What is Airflow?", 
-     "answer": "Airflow is a workflow orchestration tool used to schedule, monitor, and manage data pipelines using directed acyclic graphs."},
-    {"category": "Tools", "question": "How do you schedule pipelines?", 
-     "answer": "Pipelines can be scheduled using cron jobs or orchestration tools like Airflow."},
-    {"category": "Behavioral", "question": "What do you do if data is late?", 
-     "answer": "I first verify the source, communicate the delay, and ensure downstream systems are informed. Then I investigate and fix the root cause."},
-    {"category": "Behavioral", "question": "How do you explain data issues to non-technical people?", 
-     "answer": "I explain the impact in business terms, such as missing reports or delayed decisions, without technical jargon."},
-    {"category": "Behavioral", "question": "Do you have any questions for us?", 
-     "answer": "Yes. How do you monitor data quality in production, and what tools does the team use for pipeline reliability?"}
-]
+# Sample data generation
+@st.cache_data
+def load_data():
+    # Headcount trend data
+    headcount_trend = pd.DataFrame({
+        'Month': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        'Employees': [245, 252, 259, 266, 273, 280],
+        'New Hires': [12, 10, 15, 13, 11, 14],
+        'Terminations': [5, 3, 8, 6, 4, 7]
+    })
+    
+    # Department data
+    department_data = pd.DataFrame({
+        'Department': ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance', 'Operations'],
+        'Employee Count': [95, 62, 38, 18, 25, 42],
+        'Avg Salary': [98000, 75000, 72000, 68000, 82000, 65000]
+    })
+    
+    # Diversity data
+    diversity_data = pd.DataFrame({
+        'Gender': ['Male', 'Female', 'Non-binary'],
+        'Percentage': [58, 40, 2]
+    })
+    
+    # Turnover by department
+    turnover_data = pd.DataFrame({
+        'Department': ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance', 'Operations'],
+        'Turnover Rate': [8.2, 14.5, 11.3, 6.7, 7.8, 12.1]
+    })
+    
+    # Performance data
+    performance_data = pd.DataFrame({
+        'Rating': ['Exceptional', 'Exceeds', 'Meets', 'Needs Improvement', 'Unsatisfactory'],
+        'Count': [42, 98, 112, 23, 5]
+    })
+    
+    # Engagement trend
+    engagement_trend = pd.DataFrame({
+        'Month': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        'Score': [72, 74, 73, 76, 78, 79]
+    })
+    
+    return headcount_trend, department_data, diversity_data, turnover_data, performance_data, engagement_trend
 
-# Initialize session state
-if "card_index" not in st.session_state:
-    st.session_state.card_index = 0
-if "show_answer" not in st.session_state:
-    st.session_state.show_answer = False
-if "score" not in st.session_state:
-    st.session_state.score = 0
-if "total" not in st.session_state:
-    st.session_state.total = 0
-if "current_category" not in st.session_state:
-    st.session_state.current_category = "All"
-if "user_answer" not in st.session_state:
-    st.session_state.user_answer = ""
-if "ai_feedback" not in st.session_state:
-    st.session_state.ai_feedback = ""
-if "hint" not in st.session_state:
-    st.session_state.hint = ""
-if "custom_cards" not in st.session_state:
-    st.session_state.custom_cards = []
-
-# AI Helper Functions
-async def get_ai_feedback(question, correct_answer, user_answer):
-    """Get AI feedback on user's answer"""
-    try:
-        response = await fetch("https://api.anthropic.com/v1/messages", {
-            "method": "POST",
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({
-                "model": "claude-sonnet-4-20250514",
-                "max_tokens": 1000,
-                "messages": [{
-                    "role": "user",
-                    "content": f"""You are a helpful data engineering mentor. A student answered an interview question.
-
-Question: {question}
-
-Correct Answer: {correct_answer}
-
-Student's Answer: {user_answer}
-
-Please provide:
-1. Whether their answer is correct/partially correct/incorrect
-2. What they got right
-3. What they missed or got wrong
-4. A tip to improve their answer
-
-Keep it concise and encouraging."""
-                }]
-            })
-        })
-        data = await response.json()
-        return data["content"][0]["text"]
-    except Exception as e:
-        return f"Unable to get AI feedback at this time."
-
-async def get_hint(question, answer):
-    """Get a hint for the current question"""
-    try:
-        response = await fetch("https://api.anthropic.com/v1/messages", {
-            "method": "POST",
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({
-                "model": "claude-sonnet-4-20250514",
-                "max_tokens": 1000,
-                "messages": [{
-                    "role": "user",
-                    "content": f"""Provide a helpful hint for this data engineering interview question without giving away the full answer.
-
-Question: {question}
-
-Full Answer (for context): {answer}
-
-Give a hint that points the student in the right direction. Keep it brief (2-3 sentences)."""
-                }]
-            })
-        })
-        data = await response.json()
-        return data["content"][0]["text"]
-    except Exception as e:
-        return "Unable to generate hint at this time."
-
-async def generate_custom_card(topic, difficulty):
-    """Generate a custom flashcard on a specific topic"""
-    try:
-        response = await fetch("https://api.anthropic.com/v1/messages", {
-            "method": "POST",
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({
-                "model": "claude-sonnet-4-20250514",
-                "max_tokens": 1000,
-                "messages": [{
-                    "role": "user",
-                    "content": f"""Generate a {difficulty} level data engineering interview question about: {topic}
-
-Respond ONLY with valid JSON in this exact format (no markdown, no backticks):
-{{"category": "Custom", "question": "your question here", "answer": "detailed answer here"}}"""
-                }]
-            })
-        })
-        data = await response.json()
-        text = data["content"][0]["text"].strip()
-        # Remove any markdown code block markers
-        text = text.replace("```json", "").replace("```", "").strip()
-        return json.loads(text)
-    except Exception as e:
-        st.error(f"Unable to generate custom card: {e}")
-        return None
+# Load data
+headcount_trend, department_data, diversity_data, turnover_data, performance_data, engagement_trend = load_data()
 
 # Sidebar
-st.sidebar.title("📚 Flashcard Settings")
+st.sidebar.title("⚙️ Dashboard Controls")
+time_filter = st.sidebar.selectbox(
+    "Select Time Period",
+    ["Week", "Month", "Quarter", "Year"],
+    index=1
+)
 
-# AI Features Toggle
-st.sidebar.markdown("### 🤖 AI Features")
-ai_enabled = st.sidebar.checkbox("Enable AI Features", value=True)
-
-# Category selection
-categories = ["All"] + sorted(list(set([card["category"] for card in flashcards + st.session_state.custom_cards])))
-selected_category = st.sidebar.selectbox("Choose category:", categories, key="category_select")
-
-# Update current category if changed
-if selected_category != st.session_state.current_category:
-    st.session_state.current_category = selected_category
-    st.session_state.card_index = 0
-    st.session_state.show_answer = False
-    st.session_state.ai_feedback = ""
-    st.session_state.hint = ""
-
-# Filter cards by category
-all_cards = flashcards + st.session_state.custom_cards
-filtered_cards = all_cards if selected_category == "All" else [c for c in all_cards if c["category"] == selected_category]
-
-# Stats
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 📊 Your Progress")
-if st.session_state.total > 0:
-    accuracy = (st.session_state.score / st.session_state.total) * 100
-    st.sidebar.metric("Accuracy", f"{accuracy:.1f}%")
-st.sidebar.metric("Correct", st.session_state.score)
-st.sidebar.metric("Total Answered", st.session_state.total)
-st.sidebar.metric("Cards in Category", len(filtered_cards))
+st.sidebar.markdown("### 📊 Quick Stats")
+st.sidebar.info(f"**Total Employees:** 280\n**Departments:** 6\n**Avg Tenure:** 3.2 years")
 
-# Reset button
-if st.sidebar.button("🔄 Reset Progress"):
-    st.session_state.score = 0
-    st.session_state.total = 0
-    st.rerun()
+# Main header
+st.title("👥 HR Analytics Dashboard")
+st.markdown("### Comprehensive employee metrics and insights")
+st.markdown("---")
 
-# Custom card generator
-if ai_enabled:
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### ✨ Generate Custom Card")
-    with st.sidebar.form("custom_card_form"):
-        topic = st.text_input("Topic", placeholder="e.g., Data Lakes")
-        difficulty = st.selectbox("Difficulty", ["Easy", "Medium", "Hard"])
-        if st.form_submit_button("Generate"):
-            with st.spinner("Generating custom flashcard..."):
-                import asyncio
-                card = asyncio.run(generate_custom_card(topic, difficulty))
-                if card:
-                    st.session_state.custom_cards.append(card)
-                    st.success(f"Created custom card about {topic}!")
-                    st.rerun()
+# Key metrics row
+col1, col2, col3, col4 = st.columns(4)
 
-# Helper functions
-def next_card():
-    st.session_state.card_index = random.randint(0, len(filtered_cards) - 1)
-    st.session_state.show_answer = False
-    st.session_state.user_answer = ""
-    st.session_state.ai_feedback = ""
-    st.session_state.hint = ""
+with col1:
+    st.metric(
+        label="Total Employees",
+        value="280",
+        delta="2.6%",
+        delta_color="normal"
+    )
 
-def mark_correct():
-    st.session_state.score += 1
-    st.session_state.total += 1
-    next_card()
+with col2:
+    st.metric(
+        label="Turnover Rate",
+        value="10.2%",
+        delta="-1.3%",
+        delta_color="inverse"
+    )
 
-def mark_incorrect():
-    st.session_state.total += 1
-    next_card()
+with col3:
+    st.metric(
+        label="Avg. Time to Fill",
+        value="28 days",
+        delta="3 days",
+        delta_color="inverse"
+    )
 
-# Main content
-st.title("🧠 AI-Powered Data Engineer Flashcards")
-st.markdown("Practice with intelligent feedback and personalized hints!")
+with col4:
+    st.metric(
+        label="Engagement Score",
+        value="79%",
+        delta="1.3%",
+        delta_color="normal"
+    )
 
-# Display current card
-if len(filtered_cards) > 0:
-    card = filtered_cards[st.session_state.card_index]
-    
-    # Category badge
-    st.markdown(f'<span class="category-badge">{card["category"]}</span>', unsafe_allow_html=True)
-    
-    # Question card
-    st.markdown('<div class="main-card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="question-text">❓ {card["question"]}</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # AI-powered practice mode
-    if ai_enabled:
-        st.markdown("#### 💭 Try answering first:")
-        user_answer = st.text_area(
-            "Your answer:",
-            value=st.session_state.user_answer,
-            height=100,
-            placeholder="Type your answer here...",
-            key=f"answer_input_{st.session_state.card_index}"
-        )
-        st.session_state.user_answer = user_answer
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("💡 Get Hint", use_container_width=True):
-                with st.spinner("Generating hint..."):
-                    import asyncio
-                    hint = asyncio.run(get_hint(card["question"], card["answer"]))
-                    st.session_state.hint = hint
-                    st.rerun()
-        
-        with col2:
-            if st.button("🤖 Get AI Feedback", use_container_width=True, disabled=not user_answer):
-                with st.spinner("Analyzing your answer..."):
-                    import asyncio
-                    feedback = asyncio.run(get_ai_feedback(card["question"], card["answer"], user_answer))
-                    st.session_state.ai_feedback = feedback
-                    st.rerun()
-        
-        # Display hint if requested
-        if st.session_state.hint:
-            st.markdown(f'<div class="hint-box">💡 <strong>Hint:</strong> {st.session_state.hint}</div>', unsafe_allow_html=True)
-        
-        # Display AI feedback if available
-        if st.session_state.ai_feedback:
-            st.markdown(f'<div class="ai-feedback">🤖 <strong>AI Feedback:</strong><br>{st.session_state.ai_feedback}</div>', unsafe_allow_html=True)
-    
-    # Show answer button
-    st.markdown("---")
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("👁️ Show Answer", use_container_width=True):
-            st.session_state.show_answer = True
-            st.rerun()
-    
-    # Display answer if shown
-    if st.session_state.show_answer:
-        st.markdown(f'<div class="answer-text">✅ <strong>Answer:</strong><br>{card["answer"]}</div>', unsafe_allow_html=True)
-        
-        st.markdown("---")
-        st.markdown("#### Did you get it right?")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("✅ I got it right", type="primary", use_container_width=True):
-                mark_correct()
-                st.rerun()
-        with col2:
-            if st.button("❌ I got it wrong", use_container_width=True):
-                mark_incorrect()
-                st.rerun()
-    
-    # Next card button
-    st.markdown("---")
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("⏭️ Skip to Next Card", use_container_width=True):
-            next_card()
-            st.rerun()
+st.markdown("---")
 
-else:
-    st.warning("No flashcards available in this category.")
+# Row 1: Headcount Trend and Department Distribution
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("📈 Headcount Trend")
+    fig_headcount = go.Figure()
+    fig_headcount.add_trace(go.Scatter(
+        x=headcount_trend['Month'],
+        y=headcount_trend['Employees'],
+        mode='lines+markers',
+        name='Total Employees',
+        fill='tozeroy',
+        line=dict(color='#3b82f6', width=3)
+    ))
+    fig_headcount.add_trace(go.Bar(
+        x=headcount_trend['Month'],
+        y=headcount_trend['New Hires'],
+        name='New Hires',
+        marker_color='#10b981'
+    ))
+    fig_headcount.update_layout(
+        height=400,
+        hovermode='x unified',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    st.plotly_chart(fig_headcount, use_container_width=True)
+
+with col2:
+    st.subheader("🏢 Employees by Department")
+    fig_dept = px.bar(
+        department_data,
+        x='Department',
+        y='Employee Count',
+        color='Employee Count',
+        color_continuous_scale='Blues'
+    )
+    fig_dept.update_layout(height=400, showlegend=False)
+    st.plotly_chart(fig_dept, use_container_width=True)
+
+st.markdown("---")
+
+# Row 2: Diversity, Turnover, and Performance
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.subheader("🌈 Gender Diversity")
+    fig_diversity = px.pie(
+        diversity_data,
+        values='Percentage',
+        names='Gender',
+        color='Gender',
+        color_discrete_map={'Male': '#3b82f6', 'Female': '#ec4899', 'Non-binary': '#8b5cf6'}
+    )
+    fig_diversity.update_traces(textposition='inside', textinfo='percent+label')
+    fig_diversity.update_layout(height=350, showlegend=False)
+    st.plotly_chart(fig_diversity, use_container_width=True)
+
+with col2:
+    st.subheader("📉 Turnover Rate by Dept")
+    fig_turnover = px.bar(
+        turnover_data,
+        y='Department',
+        x='Turnover Rate',
+        orientation='h',
+        color='Turnover Rate',
+        color_continuous_scale='Reds'
+    )
+    fig_turnover.update_layout(height=350, showlegend=False)
+    st.plotly_chart(fig_turnover, use_container_width=True)
+
+with col3:
+    st.subheader("⭐ Performance Ratings")
+    fig_performance = px.bar(
+        performance_data,
+        x='Rating',
+        y='Count',
+        color='Count',
+        color_continuous_scale='Greens'
+    )
+    fig_performance.update_layout(height=350, showlegend=False)
+    fig_performance.update_xaxes(tickangle=-45)
+    st.plotly_chart(fig_performance, use_container_width=True)
+
+st.markdown("---")
+
+# Row 3: Engagement and Salary
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("💚 Employee Engagement Trend")
+    fig_engagement = px.line(
+        engagement_trend,
+        x='Month',
+        y='Score',
+        markers=True,
+        line_shape='spline'
+    )
+    fig_engagement.update_traces(line_color='#8b5cf6', line_width=3, marker_size=10)
+    fig_engagement.update_layout(height=400, yaxis_range=[0, 100])
+    st.plotly_chart(fig_engagement, use_container_width=True)
+
+with col2:
+    st.subheader("💰 Average Salary by Department")
+    fig_salary = px.bar(
+        department_data,
+        x='Department',
+        y='Avg Salary',
+        color='Avg Salary',
+        color_continuous_scale='YlOrRd'
+    )
+    fig_salary.update_layout(height=400, showlegend=False)
+    fig_salary.update_xaxes(tickangle=-45)
+    st.plotly_chart(fig_salary, use_container_width=True)
+
+st.markdown("---")
+
+# Action Items Section
+st.subheader("⚠️ Action Items")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.error("**Critical:** High turnover in Sales department (14.5%)")
+
+with col2:
+    st.warning("**Medium:** 23 employees need performance improvement plans")
+
+with col3:
+    st.info("**Info:** Quarterly engagement survey due in 2 weeks")
+
+st.markdown("---")
 
 # Footer
-st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: #6b7280; font-size: 0.9rem;'>"
-    "🤖 Powered by Claude AI • 💡 Get personalized feedback and hints!"
-    "</div>",
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div style='text-align: center; color: #666; padding: 20px;'>
+    <p>HR Analytics Dashboard | Last updated: {} | Data refreshes daily</p>
+</div>
+""".format(datetime.now().strftime("%B %d, %Y at %H:%M")), unsafe_allow_html=True)
