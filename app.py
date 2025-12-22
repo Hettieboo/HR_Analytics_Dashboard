@@ -289,6 +289,9 @@ open_positions = int(department_data['Open Positions'].sum())
 avg_tenure = float(department_data['Avg Tenure'].mean())
 num_departments = len(department_data)
 
+# Debug: Verify values are calculated (remove this in production)
+# st.write(f"Debug: {total_employees}, {num_departments}, {open_positions}, {avg_satisfaction}, {avg_tenure}")
+
 # Sidebar with enhanced filters
 st.sidebar.title("⚙️ Dashboard Controls")
 
@@ -360,7 +363,7 @@ st.sidebar.markdown(f"""
 """, unsafe_allow_html=True)
 
 # Main header with beautiful formatting
-st.markdown(f"""
+header_html = f"""
 <div class="header-container">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
         <div style="flex: 1; min-width: 300px;">
@@ -396,7 +399,9 @@ st.markdown(f"""
         </div>
     </div>
 </div>
-""", unsafe_allow_html=True)
+"""
+
+st.markdown(header_html, unsafe_allow_html=True)
 
 st.markdown("---")
 
