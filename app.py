@@ -307,14 +307,35 @@ st.sidebar.markdown("### 📥 Export Options")
 def convert_to_excel():
     from io import BytesIO
     output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        department_data.to_excel(writer, sheet_name='Departments', index=False)
-        headcount_trend.to_excel(writer, sheet_name='Headcount Trend', index=False)
-        turnover_data.to_excel(writer, sheet_name='Turnover', index=False)
-        performance_data.to_excel(writer, sheet_name='Performance', index=False)
-        recruitment_metrics.to_excel(writer, sheet_name='Recruitment', index=False)
-        turnover_breakdown.to_excel(writer, sheet_name='Turnover Breakdown', index=False)
-        skills_gap.to_excel(writer, sheet_name='Skills Gap', index=False)
+    try:
+        # Try openpyxl first (more commonly available)
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            department_data.to_excel(writer, sheet_name='Departments', index=False)
+            headcount_trend.to_excel(writer, sheet_name='Headcount Trend', index=False)
+            turnover_data.to_excel(writer, sheet_name='Turnover', index=False)
+            performance_data.to_excel(writer, sheet_name='Performance', index=False)
+            recruitment_metrics.to_excel(writer, sheet_name='Recruitment', index=False)
+            turnover_breakdown.to_excel(writer, sheet_name='Turnover Breakdown', index=False)
+            skills_gap.to_excel(writer, sheet_name='Skills Gap', index=False)
+    except ImportError:
+        # Fallback: create a simple CSV if Excel isn't available
+        import csv
+        output = BytesIO()
+        output.write(b"HR Analytics Data Export\n\n")
+        
+        # Write each dataframe as CSV section
+        for name, df in [
+            ('Departments', department_data),
+            ('Headcount Trend', headcount_trend),
+            ('Turnover', turnover_data),
+            ('Performance', performance_data),
+            ('Recruitment', recruitment_metrics),
+            ('Turnover Breakdown', turnover_breakdown),
+            ('Skills Gap', skills_gap)
+        ]:
+            output.write(f"\n{name}\n".encode())
+            output.write(df.to_csv(index=False).encode())
+    
     output.seek(0)
     return output
 
