@@ -301,15 +301,281 @@ metric_view = st.sidebar.radio(
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📥 Export Options")
+
+# Prepare data for export
+@st.cache_data
+def convert_to_excel():
+    from io import BytesIO
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        department_data.to_excel(writer, sheet_name='Departments', index=False)
+        headcount_trend.to_excel(writer, sheet_name='Headcount Trend', index=False)
+        turnover_data.to_excel(writer, sheet_name='Turnover', index=False)
+        performance_data.to_excel(writer, sheet_name='Performance', index=False)
+        recruitment_metrics.to_excel(writer, sheet_name='Recruitment', index=False)
+        turnover_breakdown.to_excel(writer, sheet_name='Turnover Breakdown', index=False)
+        skills_gap.to_excel(writer, sheet_name='Skills Gap', index=False)
+    output.seek(0)
+    return output
+
+@st.cache_data
+def generate_html_report():
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>HR Analytics Report</title>
+        <style>
+            body {{
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 40px;
+                color: #333;
+            }}
+            .header {{
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 30px;
+                border-radius: 10px;
+                margin-bottom: 30px;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 2.5em;
+            }}
+            .header p {{
+                margin: 10px 0 0 0;
+                opacity: 0.9;
+            }}
+            .metrics {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }}
+            .metric-card {{
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #667eea;
+            }}
+            .metric-label {{
+                font-size: 0.9em;
+                color: #666;
+                margin-bottom: 5px;
+            }}
+            .metric-value {{
+                font-size: 2em;
+                font-weight: bold;
+                color: #1a202c;
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+                background: white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }}
+            th {{
+                background: #667eea;
+                color: white;
+                padding: 12px;
+                text-align: left;
+            }}
+            td {{
+                padding: 12px;
+                border-bottom: 1px solid #e2e8f0;
+            }}
+            tr:hover {{
+                background: #f8f9fa;
+            }}
+            .section {{
+                margin: 30px 0;
+                page-break-inside: avoid;
+            }}
+            .section h2 {{
+                color: #667eea;
+                border-bottom: 2px solid #667eea;
+                padding-bottom: 10px;
+            }}
+            .insight {{
+                padding: 15px;
+                margin: 10px 0;
+                border-radius: 8px;
+                border-left: 4px solid;
+            }}
+            .insight-positive {{
+                background: #d4fc79;
+                border-color: #10b981;
+            }}
+            .insight-warning {{
+                background: #ffeaa7;
+                border-color: #f59e0b;
+            }}
+            .insight-critical {{
+                background: #fab1a0;
+                border-color: #ef4444;
+            }}
+            .footer {{
+                margin-top: 50px;
+                padding: 20px;
+                background: #f8f9fa;
+                border-top: 2px solid #e2e8f0;
+                text-align: center;
+                color: #666;
+            }}
+            @media print {{
+                body {{ margin: 20px; }}
+                .no-print {{ display: none; }}
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>👥 HR Analytics Report</h1>
+            <p>Comprehensive Workforce Insights</p>
+            <p>Generated: {datetime.now().strftime('%B %d, %Y at %H:%M')}</p>
+        </div>
+        
+        <div class="no-print" style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong>💡 To save as PDF:</strong> Press Ctrl+P (or Cmd+P on Mac) and select "Save as PDF"
+        </div>
+        
+        <div class="metrics">
+            <div class="metric-card">
+                <div class="metric-label">Total Workforce</div>
+                <div class="metric-value">{total_employees}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Departments</div>
+                <div class="metric-value">{num_departments}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Open Positions</div>
+                <div class="metric-value">{open_positions}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Satisfaction Score</div>
+                <div class="metric-value">{avg_satisfaction:.1f}/5.0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Average Tenure</div>
+                <div class="metric-value">{avg_tenure:.1f} yrs</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🤖 AI-Powered Insights</h2>
+            <div class="insight insight-positive">
+                <strong>✅ Positive Trend:</strong> Employee engagement increased by 9.7% over the last 6 months, with Work-Life balance showing the strongest improvement.
+            </div>
+            <div class="insight insight-warning">
+                <strong>⚠️ Attention Needed:</strong> Sales department turnover (14.5%) is above industry average. Consider retention initiatives.
+            </div>
+            <div class="insight insight-critical">
+                <strong>🔴 Critical Gap:</strong> Cybersecurity and AI/ML skills are 32% and 30% below required levels. Training recommended.
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🏢 Department Overview</h2>
+            <table>
+                <tr>
+                    <th>Department</th>
+                    <th>Employees</th>
+                    <th>Avg Salary</th>
+                    <th>Satisfaction</th>
+                    <th>Avg Tenure</th>
+                    <th>Open Positions</th>
+                </tr>
+                {''.join([f"<tr><td>{row['Department']}</td><td>{row['Employee Count']}</td><td>${row['Avg Salary']:,.0f}</td><td>{row['Satisfaction']:.1f}/5.0</td><td>{row['Avg Tenure']:.1f} yrs</td><td>{row['Open Positions']}</td></tr>" for _, row in department_data.iterrows()])}
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>📉 Turnover Analysis</h2>
+            <table>
+                <tr>
+                    <th>Department</th>
+                    <th>Current Quarter</th>
+                    <th>Previous Quarter</th>
+                    <th>Industry Average</th>
+                </tr>
+                {''.join([f"<tr><td>{row['Department']}</td><td>{row['Current Quarter']:.1f}%</td><td>{row['Previous Quarter']:.1f}%</td><td>{row['Industry Avg']:.1f}%</td></tr>" for _, row in turnover_data.iterrows()])}
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>🎯 Skills Gap Analysis</h2>
+            <table>
+                <tr>
+                    <th>Skill</th>
+                    <th>Current Level</th>
+                    <th>Required Level</th>
+                    <th>Gap</th>
+                </tr>
+                {''.join([f"<tr><td>{row['Skill']}</td><td>{row['Current']}%</td><td>{row['Required']}%</td><td style='color: #ef4444; font-weight: bold;'>{row['Gap']}%</td></tr>" for _, row in skills_gap.iterrows()])}
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>⭐ Performance Distribution</h2>
+            <table>
+                <tr>
+                    <th>Rating</th>
+                    <th>Current Period</th>
+                    <th>Previous Period</th>
+                    <th>Change</th>
+                </tr>
+                {''.join([f"<tr><td>{row['Rating']}</td><td>{row['Count']}</td><td>{row['Previous']}</td><td>{'+' if row['Count'] > row['Previous'] else ''}{row['Count'] - row['Previous']}</td></tr>" for _, row in performance_data.iterrows()])}
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>📊 Recruitment Metrics (6-Month Summary)</h2>
+            <table>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+                <tr><td>Total Applications</td><td>{recruitment_metrics['Applications'].sum():,}</td></tr>
+                <tr><td>Total Hires</td><td>{recruitment_metrics['Hires'].sum()}</td></tr>
+                <tr><td>Avg Time to Fill</td><td>{recruitment_metrics['Time to Fill'].mean():.0f} days</td></tr>
+                <tr><td>Avg Cost per Hire</td><td>${recruitment_metrics['Cost per Hire'].mean():,.0f}</td></tr>
+                <tr><td>Offer Accept Rate</td><td>{(recruitment_funnel.iloc[4]['Count'] / recruitment_funnel.iloc[3]['Count'] * 100):.0f}%</td></tr>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p><strong>© Henrietta Atsenokhai</strong></p>
+            <p>For demo purposes only</p>
+        </div>
+    </body>
+    </html>
+    """
+    return html_content
+
 export_col1, export_col2 = st.sidebar.columns(2)
 
 with export_col1:
-    if st.button("📄 PDF", use_container_width=True):
-        st.sidebar.success("✅ PDF generated!")
+    html_report = generate_html_report()
+    st.download_button(
+        label="📄 PDF",
+        data=html_report,
+        file_name=f"HR_Analytics_Report_{datetime.now().strftime('%Y%m%d')}.html",
+        mime="text/html",
+        use_container_width=True
+    )
 
 with export_col2:
-    if st.button("📊 Excel", use_container_width=True):
-        st.sidebar.success("✅ Excel ready!")
+    excel_data = convert_to_excel()
+    st.download_button(
+        label="📊 Excel",
+        data=excel_data,
+        file_name=f"HR_Analytics_{datetime.now().strftime('%Y%m%d')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True
+    )
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 Quick Stats")
